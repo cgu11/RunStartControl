@@ -17,17 +17,18 @@ RunStartControl.Config = config
 RunStartControl.StartingData = {
     StartingReward = nil, -- "Boon" or "WeaponUpgrade"
     Hammer = {
-        Aspect = nil, -- actual trait name
-        Trait = nil,
+        Aspect = nil, -- actual apsect trait name
+        Trait = nil, -- actual trait name
     },
     Boon = {
         God = nil, -- god name, nothing else
         Rarity = nil,
-        Trait = nil,
+        Trait = nil, -- actual trait name
     },
 }
 
---[[ 
+--[[ current intention is to have actual values passed in for traits, could replace with "common" ones and 
+     use mappings instead, depends on UI
  ]]
 function RunStartControl.SetStartingRewards( weapon, aspectTrait, hammerReward, boonGod, boonTrait, boonRarity, forcedFirstReward )
     HammerData.StartingData.StartingReward = forcedFirstReward
