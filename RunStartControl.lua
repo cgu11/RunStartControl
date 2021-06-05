@@ -14,60 +14,62 @@ local config = {
     ResetAfterSettingTraits = true,
 }
 RunStartControl.Config = config
-RunStartControl.RewardType = nil
-RunStartControl.StartingReward = nil
-RunStartControl.StartingRewardRarity = nil
 
-RunStartControl.RewardTypeNames = {
-    ZeusUpgrade = "Boon",
-    PoseidonUpgrade = "Boon",
-    AthenaUpgrade = "Boon",
-    ArtemisUpgrade = "Boon",
-    DemeterUpgrade = "Boon",
-    DionysusUpgrade = "Boon",
-    AresUpgrade = "Boon",
-    AthenaUpgrade = "Boon",
-    WeaponUpgrade = "WeaponUpgrade",
-    --HermesUpgrade = "HermesUpgrade"
+RunStartControl.StartingData = {
+    StartingReward = nil, -- "Boon" or "WeaponUpgrade"
+    Hammer = {
+        Aspect = nil, -- actual trait name
+        Trait = nil,
+    },
+    Boon = {
+        God = nil, -- god name, nothing else
+        Rarity = nil,
+        Trait = nil,
+    },
 }
 
---[[ Expects rewardType to be "WeaponUpgrade" for a hammer, "ZeusUpgrade" for a Zeus boon, etc. 
-     Does not currently allow Hermes/Chaos/Heart/Obol/Pom/Blue Laurel starts
-
-     Expects Trait name from TraitData for startingReward, and
-     Common, Rare, Epic, or Heroic for startingRewardRarity
+--[[ 
  ]]
-function RunStartControl.SetStartingReward(rewardType, startingReward, startingRewardRarity )
-    RunStartControl.RewardType = rewardType
-    if rewardType then
-        RunStartControl.StartingReward = RunStartControl.StartingRewardTraits[rewardType][startingReward]
-    else
-        RunStartControl.StartingReward = nil
+function RunStartControl.SetStartingRewards( weapon, aspectTrait, hammerReward, boonGod, boonTrait, boonRarity, forcedFirstReward )
+    HammerData.StartingData.StartingReward = forcedFirstReward
+    -- needs weapon and aspect to check hammer compatibility
+    if weapon and aspectTrait then
+        local hammerData = TraitData[hammerReward]
+        if hammerData and hammerData.RequiredWeapon == weapon and 
+           not Contains(HammerData.RequiredFalseTraits, aspectTrait) then
+            RunStartControl.StartingData.Hammer = {
+                Aspect = aspectTrait,
+                Trait = hammerReward,
+            }
+        end
     end
-    if rewardType == "WeaponUpgrade" then
-        RunStartReward.StartingRewardRarity = "Common"
-    else
-        RunStartReward.StartingRewardRarity = startingRewardRarity or "Common"
+    -- beowulf check later??? maybe push that upstream
+    if boonGod and boonTrait then
+        RunStartControl.StartingData.Boon = {
+            God = boonGod,
+            Rarity = boonRarity,
+            Trait = boonTrait
+        }
     end
-    
 end
 
 
--- force reward type (starting, boon or hammer)
+-- force reward type (starting, boon or hammer), only for first room if requested
 ModUtil.WrapBaseFunction("ChooseRoomReward", function( baseFunc, run, room, rewardStoreName, previouslyChosenRewards, args )
-    local rewardTypeName = RunStartControl.RewardTypeNames[RunStartControl.RewardType]
+    local startingReward = RunStartControl.StartingData.StartingReward
 
-    if RunStartControl.Config.Enabled and room.Name == "RoomOpening" and rewardTypeName then
+    if RunStartControl.Config.Enabled and room.Name == "RoomOpening" and startingReward then
         -- removing reward from reward store if exists. skipping refilling since it's not
         -- relevant for a first reward
         for rewardKey, reward in run.RewardStores['RunProgress'] do
-            if rewardKey == rewardTypeName then
+            if rewardKey == RunStartControl.StartingData.StartingReward then
                 run.RewardStores['RunProgress'][rewardKey] = nil
                 CollapseTable( run.RewardStores['RunProgress'] )
                 break
             end
         end
-        return rewardTypeName
+        RunStartControl.StartingData.StartingReward = nil
+        return startingReward
     else
         return baseFunc(run, room, rewardStoreName, previouslyChosenRewards, args)
     end
@@ -75,33 +77,48 @@ end, RunStartControl)
 
 -- force boon type
 ModUtil.WrapBaseFunction("ChooseLoot", function( baseFunc, excludeLootNames, forceLootName )
-    local rewardType = RunStartControl.RewardType
-
-    if RunStartControl.Config.Enabled and CurrentRun.RunDepthCache <= 1.0 and rewardType and rewardType ~= "WeaponUpgrade" then
-        return baseFunc( excludeLootNames, rewardType )
+    -- checking if it's the first boon, and we have a god to overwrite with
+    if RunStartControl.Config.Enabled and and RunStartControl.StartingData.God and
+       IsEmpty(GetAllUpgradableGodTraits()) then
+        return baseFunc( excludeLootNames, RunStartControl.StartingData.God .. "Upgrade" )
     else
         return baseFunc( excludeLootNames, forceLootName)
     end
 end, RunStartControl)
 
--- force reward (starting)
+-- force reward (if to be forced)
 ModUtil.WrapBaseFunction("SetTraitsOnLoot", function(baseFunc, lootData, args)
-    if RunStartControl.Config.Enabled and CurrentRun.RunDepthCache <= 1.0 and
-       lootData.Name == RunStartControl.RewardType and RunStartControl.StartingReward then
+    local hammerToForce = lootData.Name == "WeaponUpgrade" and RunStartControl.StartingData.Hammer.Trait
+    local boonToForce = lootData.GodLoot and RunStartControl.StartingData.Boon.Trait
+
+    -- verifying aspect
+    if RunStartControl.Config.Enabled and hammerToForce and HeroHasTrait(RunStartControl.StartingData.Hammer.Aspect) then
         lootData.BlockReroll = true
         lootData.UpgradeOptions = {
             { 
-                ItemName = RunStartControl.StartingReward, 
+                ItemName = RunStartControl.StartingData.Hammer.Aspect, 
                 Type = "Trait",
-                Rarity = RunStartControl.StartingRewardRarity,
+                Rarity = "Common",
             }
         }
-
-        -- resetting to force this for one run only
-        if RunStartControl.Config.ResetAfterSettingTraits then
-            RunStartControl.RewardType = nil
-            RunStartControl.StartingReward = nil
-            RunStartControl.StartingRewardRarity = nil
+        RunStartControl.StartingData.Hammer = {
+            Aspect = nil,
+            Trait = nil,
+        }
+    elseif boonToForce and lootData.Name == RunStartControl.StartingData.Boon.God .. "Upgrade" then
+        lootData.BlockReroll = true,
+        lootData.UpgradeOptions = {
+            {
+                ItemName = RunStartControl.StartingData.Boon.Trait,
+                Type = 'Trait',
+                Rarity = RunStartControl.StartinData.Boon.Rarity or "Common"
+            }
+        }
+        RunStartControl.StartingData.Boon = {
+            God = nil,
+            Trait = nil,
+            Rarity = nil
+        }
     else
         baseFunc(lootData, args)
     end
