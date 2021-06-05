@@ -11,6 +11,7 @@ ModUtil.RegisterMod("RunStartControl")
 
 local config = {
     Enabled = true,
+    ResetAfterSettingTraits = true,
 }
 RunStartControl.Config = config
 RunStartControl.RewardType = nil
@@ -95,6 +96,12 @@ ModUtil.WrapBaseFunction("SetTraitsOnLoot", function(baseFunc, lootData, args)
                 Rarity = RunStartControl.StartingRewardRarity,
             }
         }
+
+        -- resetting to force this for one run only
+        if RunStartControl.Config.ResetAfterSettingTraits then
+            RunStartControl.RewardType = nil
+            RunStartControl.StartingReward = nil
+            RunStartControl.StartingRewardRarity = nil
     else
         baseFunc(lootData, args)
     end
