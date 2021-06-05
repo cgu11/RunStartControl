@@ -1,0 +1,8 @@
+-:
+  RunStartControl v1.0
+  Authors:
+    cgull (Discord: cgull#4469)
+    Museus (Discord: Museus#7777)
+:-
+
+Import "RunStartControl.lua"
