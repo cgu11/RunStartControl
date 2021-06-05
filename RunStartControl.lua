@@ -11,7 +11,6 @@ ModUtil.RegisterMod("RunStartControl")
 
 local config = {
     Enabled = true,
-    ResetAfterSettingTraits = true,
 }
 RunStartControl.Config = config
 
