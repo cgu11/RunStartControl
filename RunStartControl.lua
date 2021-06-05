@@ -78,7 +78,7 @@ end, RunStartControl)
 -- force boon type
 ModUtil.WrapBaseFunction("ChooseLoot", function( baseFunc, excludeLootNames, forceLootName )
     -- checking if it's the first boon, and we have a god to overwrite with
-    if RunStartControl.Config.Enabled and and RunStartControl.StartingData.God and
+    if RunStartControl.Config.Enabled and room.Name == "RoomOpening" and RunStartControl.StartingData.God and
        IsEmpty(GetAllUpgradableGodTraits()) then
         return baseFunc( excludeLootNames, RunStartControl.StartingData.God .. "Upgrade" )
     else
