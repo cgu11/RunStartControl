@@ -71,7 +71,7 @@ function RunStartControl.CoreBoonReference( god, coreSlot, aspect )
         return god .. "SecondaryTrait"
     elseif coreSlot == "Cast" then
         if aspect == "ShieldLoadAmmoTrait" and god ~= "Dionysus" and god ~= "Poseidon" then
-            return "ShieldLoadAmmo_" god .. "RangedTrait"
+            return "ShieldLoadAmmo_" .. god .. "RangedTrait"
         else
             return god .. "RangedTrait"
         end
