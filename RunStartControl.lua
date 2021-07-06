@@ -31,12 +31,14 @@ RunStartControl.StartingData = {
      use mappings instead, depends on UI
  ]]
 function RunStartControl.SetStartingRewards( weapon, aspectTrait, hammerReward, boonGod, boonTrait, boonRarity, forcedFirstReward )
-    HammerData.StartingData.StartingReward = forcedFirstReward
+    RunStartControl.StartingData.StartingReward = forcedFirstReward
     -- needs weapon and aspect to check hammer compatibility
     if weapon and aspectTrait then
+        DebugPrint({Text="checkpoint 1"})
+
         local hammerData = TraitData[hammerReward]
-        if hammerData and hammerData.RequiredWeapon == weapon and 
-           not Contains(HammerData.RequiredFalseTraits, aspectTrait) then
+        if hammerData and hammerData.RequiredWeapon == weapon and not Contains(hammerData.RequiredFalseTraits, aspectTrait) then
+            DebugPrint({Text="checkpoint 2"})
             RunStartControl.StartingData.Hammer = {
                 Aspect = aspectTrait,
                 Trait = hammerReward,
@@ -61,7 +63,7 @@ ModUtil.WrapBaseFunction("ChooseRoomReward", function( baseFunc, run, room, rewa
     if RunStartControl.Config.Enabled and room.Name == "RoomOpening" and startingReward then
         -- removing reward from reward store if exists. skipping refilling since it's not
         -- relevant for a first reward
-        for rewardKey, reward in run.RewardStores['RunProgress'] do
+        for rewardKey, reward in pairs(run.RewardStores['RunProgress']) do
             if rewardKey == RunStartControl.StartingData.StartingReward then
                 run.RewardStores['RunProgress'][rewardKey] = nil
                 CollapseTable( run.RewardStores['RunProgress'] )
@@ -78,8 +80,7 @@ end, RunStartControl)
 -- force boon type
 ModUtil.WrapBaseFunction("ChooseLoot", function( baseFunc, excludeLootNames, forceLootName )
     -- checking if it's the first boon, and we have a god to overwrite with
-    if RunStartControl.Config.Enabled and room.Name == "RoomOpening" and RunStartControl.StartingData.God and
-       IsEmpty(GetAllUpgradableGodTraits()) then
+    if RunStartControl.Config.Enabled and RunStartControl.StartingData.God and IsEmpty(GetAllUpgradableGodTraits()) then
         return baseFunc( excludeLootNames, RunStartControl.StartingData.God .. "Upgrade" )
     else
         return baseFunc( excludeLootNames, forceLootName)
@@ -96,17 +97,13 @@ ModUtil.WrapBaseFunction("SetTraitsOnLoot", function(baseFunc, lootData, args)
         lootData.BlockReroll = true
         lootData.UpgradeOptions = {
             { 
-                ItemName = RunStartControl.StartingData.Hammer.Aspect, 
+                ItemName = RunStartControl.StartingData.Hammer.Trait, 
                 Type = "Trait",
                 Rarity = "Common",
             }
         }
-        RunStartControl.StartingData.Hammer = {
-            Aspect = nil,
-            Trait = nil,
-        }
     elseif boonToForce and lootData.Name == RunStartControl.StartingData.Boon.God .. "Upgrade" then
-        lootData.BlockReroll = true,
+        lootData.BlockReroll = true
         lootData.UpgradeOptions = {
             {
                 ItemName = RunStartControl.StartingData.Boon.Trait,
@@ -114,12 +111,23 @@ ModUtil.WrapBaseFunction("SetTraitsOnLoot", function(baseFunc, lootData, args)
                 Rarity = RunStartControl.StartinData.Boon.Rarity or "Common"
             }
         }
+    else
+        baseFunc(lootData, args)
+    end
+end, RunStartControl)
+
+ModUtil.WrapBaseFunction("AddTraitToHero", function(baseFunc, trait)
+    if ModUtil.SafeGet(trait, ModUtil.PathToIndexArray("TraitData.Frame")) == "Hammer" then
+        RunStartControl.StartingData.Hammer = {
+            Aspect = nil,
+            Trait = nil,
+        }
+    elseif ModUtil.SafeGet(trait, ModUtil.PathToIndexArray("TraitData.Frame")) == "Boon" then
         RunStartControl.StartingData.Boon = {
             God = nil,
             Trait = nil,
             Rarity = nil
         }
-    else
-        baseFunc(lootData, args)
     end
-end, RunStartControl)
+    baseFunc(trait)
+  end, RunStartControl)
