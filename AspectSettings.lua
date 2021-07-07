@@ -34,7 +34,7 @@ end
 
 ModUtil.WrapBaseWithinFunction("StartNewRun", "EquipWeaponUpgrade", function( baseFunc, ... )
     baseFunc( ... )
-    if RunStartControl.Config.Enabled and GameState.RunStartControl then
+    if RunStartControl.config.Enabled and GameState.RunStartControl then
         for aspectTrait, aspectSettings in pairs(GameState.RunStartControl.AspectSettings) do
             if HeroHasTrait(aspectTrait) then
                 DebugPrint({Text="Attempting to set rewqards"})

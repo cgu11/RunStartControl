@@ -27,20 +27,27 @@ RunStartControl.StartingData = {
     },
 }
 
+function IsHammerValid(hammerData, weapon, aspectTrait)
+    local aspectInvalid = Contains(hammerData.RequiredFalseTraits, aspectTrait)
+    local weaponMatch = hammerData.RequiredWeapon == weapon or 
+                       (hammerData.RequiredWeapon == "SpearWeaponThrow" and weapon == "SpearWeapon") or 
+                       (hammerData.RequiredWeapon == "BowSplitShot" and weapon == "BowWeapon")
+
+    return weaponMatch and not aspectInvalid
+end
+
 --[[ current intention is to have actual values passed in for traits, could replace with "common" ones and 
      use mappings instead, depends on UI
  ]]
 function RunStartControl.SetStartingRewards( weapon, aspectTrait, hammerReward, boonGod, boonTrait, boonRarity, forcedFirstReward )
     RunStartControl.StartingData.StartingReward = forcedFirstReward
+    local hammerData = TraitData[hammerReward]
     -- needs weapon and aspect to check hammer compatibility
-    if weapon and aspectTrait then
-        local hammerData = TraitData[hammerReward]
-        if hammerData and hammerData.RequiredWeapon == weapon and not Contains(hammerData.RequiredFalseTraits, aspectTrait) then
-            RunStartControl.StartingData.Hammer = {
-                Aspect = aspectTrait,
-                Trait = hammerReward,
-            }
-        end
+    if weapon and aspectTrait and hammerData and IsHammerValid(hammerData, weapon, aspectTrait) then
+        RunStartControl.StartingData.Hammer = {
+            Aspect = aspectTrait,
+            Trait = hammerReward,
+        }
     end
     -- beowulf check later??? maybe push that upstream
     if boonGod and boonTrait then
@@ -57,7 +64,7 @@ end
 ModUtil.WrapBaseFunction("ChooseRoomReward", function( baseFunc, run, room, rewardStoreName, previouslyChosenRewards, args )
     local startingReward = RunStartControl.StartingData.StartingReward
 
-    if RunStartControl.Config.Enabled and room.Name == "RoomOpening" and startingReward then
+    if RunStartControl.config.Enabled and room.Name == "RoomOpening" and startingReward then
         -- removing reward from reward store if exists. skipping refilling since it's not
         -- relevant for a first reward
         for rewardKey, reward in pairs(run.RewardStores['RunProgress']) do
@@ -77,7 +84,7 @@ end, RunStartControl)
 -- force boon type
 ModUtil.WrapBaseFunction("ChooseLoot", function( baseFunc, excludeLootNames, forceLootName )
     -- checking if it's the first boon, and we have a god to overwrite with
-    if RunStartControl.Config.Enabled and RunStartControl.StartingData.God and IsEmpty(GetAllUpgradableGodTraits()) then
+    if RunStartControl.config.Enabled and RunStartControl.StartingData.God and IsEmpty(GetAllUpgradableGodTraits()) then
         return baseFunc( excludeLootNames, RunStartControl.StartingData.God .. "Upgrade" )
     else
         return baseFunc( excludeLootNames, forceLootName)
@@ -90,7 +97,7 @@ ModUtil.WrapBaseFunction("SetTraitsOnLoot", function(baseFunc, lootData, args)
     local boonToForce = lootData.GodLoot and RunStartControl.StartingData.Boon.Trait
 
     -- verifying aspect
-    if RunStartControl.Config.Enabled and hammerToForce and HeroHasTrait(RunStartControl.StartingData.Hammer.Aspect) then
+    if RunStartControl.config.Enabled and hammerToForce and HeroHasTrait(RunStartControl.StartingData.Hammer.Aspect) then
         lootData.BlockReroll = true
         lootData.UpgradeOptions = {
             { 
