@@ -12,7 +12,7 @@ ModUtil.RegisterMod("RunStartControl")
 local config = {
     Enabled = true,
 }
-RunStartControl.Config = config
+RunStartControl.config = config
 
 RunStartControl.StartingData = {
     StartingReward = nil, -- "Boon" or "WeaponUpgrade"
