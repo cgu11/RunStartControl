@@ -1,15 +1,17 @@
 function RunStartControl.CreateAspectConfigMenu( screen )
-    local nrows = 4
-    local idx = 0
+    if RunStartControl.config.Enabled then
+        local nrows = 4
+        local idx = 0
 
-    for i = 1, TableLength(RunStartControl.WeaponAspectData) do
-        local weaponData = RunStartControl.WeaponAspectData[i]
-        for j = 1, TableLength(weaponData.Aspects) do
-            local aspectID = weaponData.Aspects[j]
-            local gridX = math.ceil((idx+1) / nrows)
-            local gridY = idx % nrows + 1
-            CreateHammerPicker( screen, weaponData.Name, aspectID, gridX, gridY)
-            idx = idx + 1
+        for i = 1, TableLength(RunStartControl.WeaponAspectData) do
+            local weaponData = RunStartControl.WeaponAspectData[i]
+            for j = 1, TableLength(weaponData.Aspects) do
+                local aspectID = weaponData.Aspects[j]
+                local gridX = math.ceil((idx+1) / nrows)
+                local gridY = idx % nrows + 1
+                CreateHammerPicker( screen, weaponData.Name, aspectID, gridX, gridY)
+                idx = idx + 1
+            end
         end
     end
 end

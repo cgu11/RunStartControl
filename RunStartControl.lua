@@ -12,7 +12,7 @@ ModUtil.RegisterMod("RunStartControl")
 local config = {
     Enabled = true,
 }
-RunStartControl.Config = config
+RunStartControl.config = config
 
 RunStartControl.StartingData = {
     StartingReward = nil, -- "Boon" or "WeaponUpgrade"
@@ -34,11 +34,8 @@ function RunStartControl.SetStartingRewards( weapon, aspectTrait, hammerReward, 
     RunStartControl.StartingData.StartingReward = forcedFirstReward
     -- needs weapon and aspect to check hammer compatibility
     if weapon and aspectTrait then
-        DebugPrint({Text="checkpoint 1"})
-
         local hammerData = TraitData[hammerReward]
         if hammerData and hammerData.RequiredWeapon == weapon and not Contains(hammerData.RequiredFalseTraits, aspectTrait) then
-            DebugPrint({Text="checkpoint 2"})
             RunStartControl.StartingData.Hammer = {
                 Aspect = aspectTrait,
                 Trait = hammerReward,
