@@ -108,5 +108,7 @@ function HammerPickerRight(screen, button)
 end
 
 ModUtil.LoadOnce(function()
-    ModConfigMenu.RegisterMenuOverride({ModName = "Aspect Hammer Settings"}, RunStartControl.CreateAspectConfigMenu)
+    if RunStartControl.config.Menu == "configmenu" then
+        ModConfigMenu.RegisterMenuOverride({ModName = "Aspect Hammer Settings"}, RunStartControl.CreateAspectConfigMenu)
+    end
   end)

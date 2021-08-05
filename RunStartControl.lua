@@ -11,6 +11,7 @@ ModUtil.RegisterMod("RunStartControl")
 
 local config = {
     Enabled = true,
+    Menu = "prerun", --"prerun" for pre-pact selection, or "configmenu" for modconfigmenu
 }
 RunStartControl.config = config
 

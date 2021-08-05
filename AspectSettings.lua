@@ -34,10 +34,10 @@ end
 
 ModUtil.WrapBaseWithinFunction("StartNewRun", "EquipWeaponUpgrade", function( baseFunc, ... )
     baseFunc( ... )
-    if RunStartControl.config.Enabled and GameState.RunStartControl then
+    if RunStartControl.config.Enabled and GameState.RunStartControl and RunStartControl.config.Menu == "configmenu" then
         for aspectTrait, aspectSettings in pairs(GameState.RunStartControl.AspectSettings) do
             if HeroHasTrait(aspectTrait) then
-                DebugPrint({Text="Attempting to set rewqards"})
+                DebugPrint({Text="Attempting to set rewards"})
                 RunStartControl.SetStartingRewards(
                     aspectSettings.Weapon,
                     aspectSettings.Aspect,

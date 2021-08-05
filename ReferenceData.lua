@@ -109,6 +109,17 @@ RunStartControl.DefaultHammerSettings = {
     GunLoadedGrenadeTrait = "GunGrenadeFastTrait",
 }
 
+RunStartControl.BoonGods = {
+    "Aphrodite",
+    "Ares",
+    "Artemis",
+    "Athena",
+    "Demeter",
+    "Dionysus",
+    "Poseidon",
+    "Zeus",
+}
+
 -- God is capitalized god name, coreSlot is Attack/Special/Cast/Dash, aspect is "ShieldLoadAmmoTrait" or nothing,
 -- just checking for beowulf
 function RunStartControl.CoreBoonReference( god, coreSlot, aspect )
@@ -125,4 +136,17 @@ function RunStartControl.CoreBoonReference( god, coreSlot, aspect )
     elseif coreSlot == "Dash" then
         return god .."RushTrait"
     end
+end
+
+function RunStartControl.GetEquippedWeaponAspect()
+    for i, weaponData in ipairs(RunStartControl.WeaponAspectData) do
+        for i, aspectTrait in ipairs(weaponData.Aspects) do
+            if HeroHasTrait(aspectTrait) then
+                return {
+                    Weapon = weaponData.Name,
+                    Aspect = aspectTrait,
+                }
+            end
+        end
+    end 
 end
