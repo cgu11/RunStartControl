@@ -127,7 +127,7 @@ ModUtil.WrapBaseFunction("AddTraitToHero", function(baseFunc, trait)
             Aspect = nil,
             Trait = nil,
         }
-    elseif ModUtil.SafeGet(trait, ModUtil.PathToIndexArray("TraitData.Frame")) == "Boon" then
+    elseif trait.TraitData and trait.TraitData.God then
         RunStartControl.StartingData.Boon = {
             God = nil,
             Trait = nil,
