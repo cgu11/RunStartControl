@@ -85,8 +85,8 @@ end, RunStartControl)
 -- force boon type
 ModUtil.WrapBaseFunction("ChooseLoot", function( baseFunc, excludeLootNames, forceLootName )
     -- checking if it's the first boon, and we have a god to overwrite with
-    if RunStartControl.config.Enabled and RunStartControl.StartingData.God and IsEmpty(GetAllUpgradableGodTraits()) then
-        return baseFunc( excludeLootNames, RunStartControl.StartingData.God .. "Upgrade" )
+    if RunStartControl.config.Enabled and RunStartControl.StartingData.Boon.God then
+        return baseFunc( excludeLootNames, RunStartControl.StartingData.Boon.God .. "Upgrade" )
     else
         return baseFunc( excludeLootNames, forceLootName)
     end
@@ -113,7 +113,7 @@ ModUtil.WrapBaseFunction("SetTraitsOnLoot", function(baseFunc, lootData, args)
             {
                 ItemName = RunStartControl.StartingData.Boon.Trait,
                 Type = 'Trait',
-                Rarity = RunStartControl.StartinData.Boon.Rarity or "Common"
+                Rarity = RunStartControl.StartingData.Boon.Rarity or "Common"
             }
         }
     else

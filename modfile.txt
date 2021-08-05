@@ -12,3 +12,4 @@ Import "ReferenceData.lua"
 Import "AspectSettings.lua"
 Load Priority 100
 Import "AspectConfigMenu.lua"
+Import "PrePactConfigMenu.lua"

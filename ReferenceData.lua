@@ -150,3 +150,12 @@ function RunStartControl.GetEquippedWeaponAspect()
         end
     end 
 end
+
+function RunStartControl.HeroForcingGod()
+    for k, trait in pairs( CurrentRun.Hero.Traits ) do
+        if trait ~= nil and trait.ForceBoonName ~= nil and trait.Uses > 0 then
+            return trait.ForceBoonName:sub(1, -8)
+        end
+    end
+    return false
+end
