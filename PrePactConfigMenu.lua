@@ -445,6 +445,10 @@ function ConfirmSelection( screen, button )
 end
 
 function ExitPrePactConfigMenu( screen, button )
+  RunStartControl.PrePactConfigMenuToggle = nil
+  RunStartControl.HammerPreference = nil
+  RunStartControl.GodPreference = nil
+  RunStartControl.SlotPreference = nil
   if RunStartControl.PrePactConfigMenuToggle == "hammer" then
     HideHammerSelectionScreen(screen)
   elseif RunStartControl.PrePactConfigMenuToggle == "boon" then
