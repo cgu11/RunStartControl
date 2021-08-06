@@ -60,6 +60,21 @@ function RunStartControl.SetStartingRewards( weapon, aspectTrait, hammerReward, 
     end
 end
 
+-- Reset starting rewards
+function RunStartControl.ResetStartingRewards()
+    RunStartControl.StartingData = {
+        StartingReward = nil,
+        Hammer = {
+            Aspect = nil, 
+            Trait = nil, 
+        },
+        Boon = {
+            God = nil,
+            Rarity = nil,
+            Trait = nil, 
+        },
+    }
+end
 
 -- force reward type (starting, boon or hammer), only for first room if requested
 ModUtil.WrapBaseFunction("ChooseRoomReward", function( baseFunc, run, room, rewardStoreName, previouslyChosenRewards, args )
