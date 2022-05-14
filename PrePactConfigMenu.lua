@@ -473,6 +473,8 @@ ModUtil.WrapBaseFunction('UseEscapeDoor', function( baseFunc, ... )
     if RunStartControl.config.Enabled and RunStartControl.config.Menu == "prerun" then
       RunStartControl.ResetStartingRewards()
       CreatePrePactConfigMenu()
+    else
+      baseFunc( ... )
     end
     if RunStartControl.MoveOn then
         baseFunc( ... )
