@@ -11,9 +11,12 @@ ModUtil.RegisterMod("RunStartControl")
 
 local config = {
     Enabled = true,
-    Menu = "configmenu", --"prerun" for pre-pact selection, or "configmenu" for modconfigmenu
+    Menu = "both", --"prerun" for pre-pact selection, "configmenu" for modconfigmenu, "both" for both
 }
 RunStartControl.config = config
+
+RunStartControl.ForceFirstReward = RunStartControl.config.Enabled and (RunStartControl.config.Menu == "prerun" or RunStartControl.config.Menu == "both")
+RunStartControl.ForceFirstHammer = RunStartControl.config.Enabled and (RunStartControl.config.Menu == "configmenu" or RunStartControl.config.Menu == "both")
 
 RunStartControl.StartingData = {
     StartingReward = nil, -- "Boon" or "WeaponUpgrade"
@@ -80,7 +83,7 @@ end
 ModUtil.WrapBaseFunction("ChooseRoomReward", function( baseFunc, run, room, rewardStoreName, previouslyChosenRewards, args )
     local startingReward = RunStartControl.StartingData.StartingReward
 
-    if RunStartControl.config.Enabled and room.Name == "RoomOpening" and startingReward then
+    if RunStartControl.ForceFirstReward and room.Name == "RoomOpening" and startingReward then
         -- removing reward from reward store if exists. skipping refilling since it's not
         -- relevant for a first reward
         for rewardKey, reward in pairs(run.RewardStores['RunProgress']) do
@@ -100,7 +103,7 @@ end, RunStartControl)
 -- force boon type
 ModUtil.WrapBaseFunction("ChooseLoot", function( baseFunc, excludeLootNames, forceLootName )
     -- checking if it's the first boon, and we have a god to overwrite with
-    if RunStartControl.config.Enabled and RunStartControl.StartingData.Boon.God then
+    if RunStartControl.ForceFirstReward and RunStartControl.StartingData.Boon.God then
         return baseFunc( excludeLootNames, RunStartControl.StartingData.Boon.God .. "Upgrade" )
     else
         return baseFunc( excludeLootNames, forceLootName)
@@ -113,7 +116,7 @@ ModUtil.WrapBaseFunction("SetTraitsOnLoot", function(baseFunc, lootData, args)
     local boonToForce = lootData.GodLoot and RunStartControl.StartingData.Boon.Trait
 
     -- verifying aspect
-    if RunStartControl.config.Enabled and hammerToForce and HeroHasTrait(RunStartControl.StartingData.Hammer.Aspect) then
+    if RunStartControl.ForceFirstHammer and hammerToForce and HeroHasTrait(RunStartControl.StartingData.Hammer.Aspect) then
         lootData.BlockReroll = true
         lootData.UpgradeOptions = {
             { 
@@ -122,7 +125,7 @@ ModUtil.WrapBaseFunction("SetTraitsOnLoot", function(baseFunc, lootData, args)
                 Rarity = "Common",
             }
         }
-    elseif boonToForce and lootData.Name == RunStartControl.StartingData.Boon.God .. "Upgrade" then
+    elseif RunStartControl.ForceFirstReward and boonToForce and lootData.Name == RunStartControl.StartingData.Boon.God .. "Upgrade" then
         lootData.BlockReroll = true
         lootData.UpgradeOptions = {
             {

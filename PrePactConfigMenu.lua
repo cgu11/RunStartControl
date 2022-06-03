@@ -470,7 +470,7 @@ function ExitPrePactConfigMenu( screen, button )
 end
 
 ModUtil.WrapBaseFunction('UseEscapeDoor', function( baseFunc, ... )
-    if RunStartControl.config.Enabled and RunStartControl.config.Menu == "prerun" then
+    if RunStartControl.ForceFirstReward then
       RunStartControl.ResetStartingRewards()
       CreatePrePactConfigMenu()
     else
