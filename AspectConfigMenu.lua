@@ -94,7 +94,7 @@ function HammerPickerMove( screen, button, offset )
 
     local newHammer = RunStartControl.HammerOptions[aspect][hammerIndex]
 
-    RunStartControl.SetAspectSettings(weapon, aspect, newHammer, nil, nil, nil, nil)
+    RunStartControl.SetAspectSettings(weapon, aspect, newHammer)
 
     ModifyTextBox({ Id = screen.Components["HammerPicker"..aspect].Id, Text = GameState.RunStartControl.AspectSettings[aspect].Hammer})
 end
