@@ -12,6 +12,7 @@ function CreatePrePactConfigMenu()
       MenuComponents = {},
       CloseAnimation  = "QuestLogBackground_Out"
     }
+
   OnScreenOpened({ Flag = screen.Name, PersistCombatUI = true})
   FreezePlayerUnit()
   EnableShopGamepadCursor()
@@ -423,23 +424,23 @@ end
 
 function ConfirmSelection( screen, button )
   local weaponAspectData = RunStartControl.GetEquippedWeaponAspect()
+
   if RunStartControl.PrePactConfigMenuToggle == "boon" then
-    RunStartControl.SetStartingRewards(
-      nil, nil, nil,
+    RunStartControl.StartingReward = "Boon"
+    RunStartControl.SetForcedBoon(
       RunStartControl.GodPreference,
       RunStartControl.CoreBoonReference(RunStartControl.GodPreference, RunStartControl.SlotPreference, weaponAspectData.Aspect),
-      "Epic",
-      "Boon"
+      "Epic"
     )
   elseif RunStartControl.PrePactConfigMenuToggle == "hammer" then
-    RunStartControl.SetStartingRewards(
+    RunStartControl.StartingReward = "WeaponUpgrade"
+    RunStartControl.SetForcedHammer(
       weaponAspectData.Weapon,
       weaponAspectData.Aspect,
-      RunStartControl.HammerPreference,
-      nil, nil, nil,
-      "WeaponUpgrade"
+      RunStartControl.HammerPreference
     )
   end
+
   button.args = {MoveOn = true}
   ExitPrePactConfigMenu(screen, button)
 end
@@ -449,11 +450,13 @@ function ExitPrePactConfigMenu( screen, button )
   RunStartControl.HammerPreference = nil
   RunStartControl.GodPreference = nil
   RunStartControl.SlotPreference = nil
+
   if RunStartControl.PrePactConfigMenuToggle == "hammer" then
     HideHammerSelectionScreen(screen)
   elseif RunStartControl.PrePactConfigMenuToggle == "boon" then
     HideBoonSelectionScreen(screen)
   end
+
   RunStartControl.PrePactConfigMenuToggle = nil
   DisableShopGamepadCursor()
   SetConfigOption({ Name = "FreeFormSelectWrapY", Value = false })
@@ -470,14 +473,20 @@ function ExitPrePactConfigMenu( screen, button )
 end
 
 ModUtil.WrapBaseFunction('UseEscapeDoor', function( baseFunc, ... )
-    if RunStartControl.config.Enabled and RunStartControl.config.Menu == "prerun" then
-      RunStartControl.ResetStartingRewards()
-      CreatePrePactConfigMenu()
-    else
-      baseFunc( ... )
-    end
-    if RunStartControl.MoveOn then
-        baseFunc( ... )
-    end
-    RunStartControl.MoveOn = nil
+  if not RunStartControl.ForceFirstHammer then
+    RunStartControl.Log("Resetting rewards...")
+    RunStartControl.ResetStartingRewards()
+  end
+
+  if RunStartControl.ForceFirstReward then
+    CreatePrePactConfigMenu()
+  else
+    baseFunc( ... )
+  end
+
+  if RunStartControl.MoveOn then
+    baseFunc( ... )
+  end
+
+  RunStartControl.MoveOn = nil
 end, RunStartControl)

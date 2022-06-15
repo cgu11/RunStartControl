@@ -1,5 +1,5 @@
 function RunStartControl.CreateAspectConfigMenu( screen )
-    if RunStartControl.config.Enabled then
+    if RunStartControl.ForceFirstHammer then
         local nrows = 4
         local idx = 0
 
@@ -94,7 +94,7 @@ function HammerPickerMove( screen, button, offset )
 
     local newHammer = RunStartControl.HammerOptions[aspect][hammerIndex]
 
-    RunStartControl.SetAspectSettings(weapon, aspect, newHammer, nil, nil, nil, nil)
+    RunStartControl.SetAspectSettings(weapon, aspect, newHammer)
 
     ModifyTextBox({ Id = screen.Components["HammerPicker"..aspect].Id, Text = GameState.RunStartControl.AspectSettings[aspect].Hammer})
 end
@@ -108,7 +108,7 @@ function HammerPickerRight(screen, button)
 end
 
 ModUtil.LoadOnce(function()
-    if RunStartControl.config.Menu == "configmenu" then
+    if RunStartControl.ForceFirstHammer then
         ModConfigMenu.RegisterMenuOverride({ModName = "Aspect Hammer Settings"}, RunStartControl.CreateAspectConfigMenu)
     end
-  end)
+end)
