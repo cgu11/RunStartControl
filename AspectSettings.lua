@@ -32,27 +32,28 @@ function RunStartControl.DeleteModDataFromSavefile()
     GameState.RunStartControl = nil
 end
 
-ModUtil.WrapBaseWithinFunction("StartNewRun", "EquipWeaponUpgrade", function( baseFunc, ... )
-    baseFunc( ... )
-    if RunStartControl.config.Enabled and GameState.RunStartControl and RunStartControl.config.Menu == "configmenu" then
-        for aspectTrait, aspectSettings in pairs(GameState.RunStartControl.AspectSettings) do
-            if HeroHasTrait(aspectTrait) then
-                DebugPrint({Text="Attempting to set rewards"})
-                RunStartControl.SetStartingRewards(
-                    aspectSettings.Weapon,
-                    aspectSettings.Aspect,
-                    aspectSettings.Hammer,
-                    aspectSettings.God,
-                    aspectSettings.Trait,
-                    aspectSettings.Rarity,
-                    aspectSettings.StartingReward
-                )
-            break
+ModUtil.Path.Context.Env("StartNewRun", function()
+    ModUtil.Path.Wrap("EquipWeaponUpgrade", function( baseFunc, ... )
+        baseFunc( ... )
+        if RunStartControl.config.Enabled and GameState.RunStartControl and RunStartControl.config.Menu == "configmenu" then
+            for aspectTrait, aspectSettings in pairs(GameState.RunStartControl.AspectSettings) do
+                if HeroHasTrait(aspectTrait) then
+                    DebugPrint({Text="Attempting to set rewards"})
+                    RunStartControl.SetStartingRewards(
+                        aspectSettings.Weapon,
+                        aspectSettings.Aspect,
+                        aspectSettings.Hammer,
+                        aspectSettings.God,
+                        aspectSettings.Trait,
+                        aspectSettings.Rarity,
+                        aspectSettings.StartingReward
+                    )
+                break
+                end
             end
         end
-    end
+    end, RunStartControl)
 end, RunStartControl)
-
 
 ModUtil.LoadOnce( function()
     if not GameState.RunStartControl then
